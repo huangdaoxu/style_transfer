@@ -11,7 +11,7 @@ from utils import get_iterator
 style_pic = cv2.imread("/home/hdx/data/coco/style1.jpg")
 style_pic = cv2.resize(style_pic, (256, 256))
 
-epoch = 5
+epoch = 10
 current_epoch = 0
 batch_size = 8
 
@@ -49,6 +49,10 @@ with tf.Session() as sess:
         while not coord.should_stop():
             images = sess.run(iterator)
             sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+            counter += 1
+            if counter/10 == 0:
+                result = sess.run([summary], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+                writer.add_summary(result)
 
     except tf.errors.OutOfRangeError:
         coord.request_stop()
