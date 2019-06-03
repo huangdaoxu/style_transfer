@@ -96,8 +96,6 @@ def build_model(inputs, style):
     return optimizer, trans, total_loss
 
 
-
-
 def block_v1(inputs, filters, name):
     with tf.variable_scope(name_or_scope=name):
         shortcut = slim.conv2d(inputs, filters, kernel_size=[1, 1], stride=1, scope="conv1")
