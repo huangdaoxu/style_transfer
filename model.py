@@ -73,6 +73,7 @@ def transfer_net(inputs, name="transfer", reuse=True):
                                 activation_fn=tf.nn.tanh)
 
         variables = tf.contrib.framework.get_variables(vs)
+        net = (net + 1) * 127.5
 
         return net, variables
 
