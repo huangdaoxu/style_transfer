@@ -52,18 +52,24 @@ def vgg_16(inputs,
 
 def transfer_net(inputs, name="transfer", reuse=True):
     with tf.variable_scope(name, reuse=reuse) as vs:
-        net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [3, 3], scope='conv1')
+        net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
+        net = slim.batch_norm(net)
         net = layers_lib.repeat(net, 2, layers.conv2d, 64, [3, 3], scope='conv2')
+        net = slim.batch_norm(net)
         net = layers_lib.repeat(net, 2, layers.conv2d, 128, [3, 3], scope='conv3')
+        net = slim.batch_norm(net)
 
         net = block_v1(net, 128, "residual1")
         net = block_v1(net, 128, "residual2")
         net = block_v1(net, 128, "residual3")
         net = block_v1(net, 128, "residual4")
 
+        net = slim.batch_norm(net)
         net = layers_lib.repeat(net, 2, layers.conv2d, 64, [3, 3], scope='conv4')
+        net = slim.batch_norm(net)
         net = layers_lib.repeat(net, 2, layers.conv2d, 32, [3, 3], scope='conv5')
-        net = layers_lib.repeat(net, 1, layers.conv2d, 3, [3, 3], scope='conv6',
+        net = slim.batch_norm(net)
+        net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6',
                                 activation_fn=tf.nn.tanh)
 
         variables = tf.contrib.framework.get_variables(vs)
@@ -89,7 +95,7 @@ def build_model(inputs, style):
 
     style_loss = styleloss(f1, f2, f3, f4)
 
-    total_loss = 1.0*content_loss + 20*style_loss
+    total_loss = 1.0*content_loss + 100*style_loss
 
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
