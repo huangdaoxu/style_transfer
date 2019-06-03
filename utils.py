@@ -1,8 +1,7 @@
 import tensorflow as tf
-import numpy as np
 
 
-MEAN_VALUES = np.array([123.68, 116.779, 103.939])
+MEAN_VALUES = [123.68, 116.779, 103.939]
 
 
 def load_single_picture(filename, width=256, height=256):
