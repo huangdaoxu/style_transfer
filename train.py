@@ -6,19 +6,20 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 
 from model import build_model
-from utils import get_iterator
+from utils import get_iterator, load_single_picture
 
-style_pic = cv2.imread("/home/hdx/data/coco/style1.jpg")
-style_pic = cv2.resize(style_pic, (256, 256))
+# style_pic = cv2.imread("/home/hdx/data/coco/style1.jpg")
+# style_pic = cv2.resize(style_pic, (256, 256))
+style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 10
 current_epoch = 0
-batch_size = 4
+batch_size = 5
 
 MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape((1, 1, 1, 3))
 
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
-style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="x")
+style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
 
 iterator = get_iterator(glob.glob("/home/hdx/data/coco/val2017/*.jpg"), batch_size, epoch)
 optimizer, trans, total_loss = build_model(inputs, style)
@@ -39,6 +40,7 @@ variable_restore_op = slim.assign_from_checkpoint_fn("./vgg_16.ckpt",
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     sess.run(tf.local_variables_initializer())
+    style_pic = sess.run(style_pic)
     writer = tf.summary.FileWriter("./tensorboard/", sess.graph)
     variable_restore_op(sess)
 
@@ -53,7 +55,7 @@ with tf.Session() as sess:
             if counter % 10 == 0:
                 print("summary")
                 result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
-                writer.add_summary(result)
+                writer.add_summary(result, counter)
 
     except tf.errors.OutOfRangeError:
         coord.request_stop()
