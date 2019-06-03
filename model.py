@@ -89,11 +89,11 @@ def build_model(inputs, style):
 
     style_loss = styleloss(f1, f2, f3, f4)
 
-    total_loss = 0.25*content_loss + 0.75*style_loss
+    total_loss = 0.1*content_loss + 2*style_loss
 
-    optimizer = tf.train.AdamOptimizer(0.00001).minimize(total_loss, var_list=var)
+    optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
-    return optimizer, trans, total_loss
+    return optimizer, trans, total_loss, content_loss, style_loss
 
 
 def block_v1(inputs, filters, name):
