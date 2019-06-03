@@ -8,19 +8,19 @@ from tensorflow.contrib import slim
 from model import build_model
 from utils import get_iterator
 
-style_pic = cv2.imread("/Users/hdx/Downloads/style1.jpg")
+style_pic = cv2.imread("/home/hdx/data/coco/style1.jpg")
 style_pic = cv2.resize(style_pic, (256, 256))
 
 epoch = 5
 current_epoch = 0
-batch_size = 2
+batch_size = 8
 
 MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape((1, 1, 1, 3))
 
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
 style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="x")
 
-iterator = get_iterator(glob.glob("/Users/hdx/code/python3/ocr/data/*.jpg"), 2, epoch)
+iterator = get_iterator(glob.glob("/home/hdx/data/coco/val2017/*.jpg"), batch_size, epoch)
 optimizer, trans, total_loss = build_model(inputs, style)
 
 tf.summary.scalar('losses/total_loss', total_loss)
