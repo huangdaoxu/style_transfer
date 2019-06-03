@@ -14,7 +14,7 @@ style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 10
 current_epoch = 0
-batch_size = 5
+batch_size = 4
 
 MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape((1, 1, 1, 3))
 
