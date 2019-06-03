@@ -91,7 +91,7 @@ def build_model(inputs, style):
 
     total_loss = 0.25*content_loss + 0.75*style_loss
 
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(total_loss, var_list=var)
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(total_loss, var_list=var)
 
     return optimizer, trans, total_loss
 
@@ -130,7 +130,8 @@ def styleloss(f1, f2, f3, f4):
 
 
 def gram_matrix(input_tensor):
-  result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
-  input_shape = tf.shape(input_tensor)
-  num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
-  return result/(num_locations)
+    result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
+    input_shape = tf.shape(input_tensor)
+    num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
+    return result/num_locations
+
