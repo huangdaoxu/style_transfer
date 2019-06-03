@@ -13,7 +13,7 @@ style_pic = cv2.resize(style_pic, (256, 256))
 
 epoch = 10
 current_epoch = 0
-batch_size = 8
+batch_size = 4
 
 MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape((1, 1, 1, 3))
 
