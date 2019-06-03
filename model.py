@@ -51,6 +51,7 @@ def vgg_16(inputs,
 
 
 def transfer_net(inputs, name="transfer", reuse=True):
+    inputs = inputs / 255.0
     with tf.variable_scope(name, reuse=reuse) as vs:
         net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
         net = slim.batch_norm(net)
@@ -73,7 +74,6 @@ def transfer_net(inputs, name="transfer", reuse=True):
                                 activation_fn=tf.nn.tanh)
 
         variables = tf.contrib.framework.get_variables(vs)
-        net = (net + 1) * 127.5
 
         return net, variables
 
