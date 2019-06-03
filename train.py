@@ -1,5 +1,4 @@
 import glob
-import cv2
 
 import numpy as np
 import tensorflow as tf
@@ -8,8 +7,6 @@ from tensorflow.contrib import slim
 from model import build_model
 from utils import get_iterator, load_single_picture
 
-# style_pic = cv2.imread("/home/hdx/data/coco/style1.jpg")
-# style_pic = cv2.resize(style_pic, (256, 256))
 style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 10
@@ -29,7 +26,6 @@ tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.image('transformed', trans)
 tf.summary.image('origin', inputs)
-tf.summary.image('style', style)
 
 summary = tf.summary.merge_all()
 
@@ -55,7 +51,6 @@ with tf.Session() as sess:
             sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
             counter += 1
             if counter % 100 == 0:
-                print("summary")
                 result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
                 writer.add_summary(result, counter)
 
