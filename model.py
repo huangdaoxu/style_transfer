@@ -91,7 +91,7 @@ def build_model(inputs, style):
 
     total_loss = 0.25*content_loss + 0.75*style_loss
 
-    optimizer = tf.train.AdamOptimizer(0.01).minimize(total_loss, var_list=var)
+    optimizer = tf.train.AdamOptimizer(0.00001).minimize(total_loss, var_list=var)
 
     return optimizer, trans, total_loss
 
