@@ -48,11 +48,11 @@ with tf.Session() as sess:
     try:
         while not coord.should_stop():
             images = sess.run(iterator)
-            sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+            sess.run([optimizer], feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])])})
             counter += 1
             if counter % 10 == 0:
                 print("summary")
-                result = sess.run([summary], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+                result = sess.run([summary], feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])])})
                 writer.add_summary(result)
 
     except tf.errors.OutOfRangeError:
