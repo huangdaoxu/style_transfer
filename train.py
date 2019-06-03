@@ -20,7 +20,7 @@ MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape((1, 1, 1, 3))
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
 style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="x")
 
-iterator = get_iterator(glob.glob("/Users/hdx/code/python3/ocr/data/*.png"), 2, epoch)
+iterator = get_iterator(glob.glob("/Users/hdx/code/python3/ocr/data/*.jpg"), 2, epoch)
 optimizer, trans, total_loss = build_model(inputs, style)
 
 tf.summary.scalar('losses/total_loss', total_loss)
