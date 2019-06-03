@@ -6,7 +6,7 @@ MEAN_VALUES = [123.68, 116.779, 103.939]
 
 def load_single_picture(filename, width=256, height=256):
     image_raw_data = tf.gfile.FastGFile(filename, 'rb').read()
-    image = tf.image.decode_jpeg(image_raw_data)
+    image = tf.image.decode_jpeg(image_raw_data, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize_images(image, size=(width, height))
     image = _mean_image_subtraction(image)
