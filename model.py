@@ -63,7 +63,7 @@ def transfer_net(inputs, name="transfer", reuse=True):
 
         net = layers_lib.repeat(net, 2, layers.conv2d, 64, [3, 3], scope='conv4')
         net = layers_lib.repeat(net, 2, layers.conv2d, 32, [3, 3], scope='conv5')
-        net = layers_lib.repeat(inputs, 1, layers.conv2d, 3, [3, 3], scope='conv6',
+        net = layers_lib.repeat(net, 1, layers.conv2d, 3, [3, 3], scope='conv6',
                                 activation_fn=tf.nn.tanh)
 
         variables = tf.contrib.framework.get_variables(vs)
@@ -84,8 +84,8 @@ def build_model(inputs, style):
     f3 = end_points["vgg_16/conv3/conv3_3"]
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
-    trans, inputs, _ = tf.split(f3, 3, 0)
-    content_loss = tf.nn.l2_loss(trans - inputs) / tf.to_float(tf.size(trans))
+    trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
+    content_loss = tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3))
 
     style_loss = styleloss(f1, f2, f3, f4)
 
