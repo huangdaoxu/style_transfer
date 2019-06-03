@@ -52,7 +52,7 @@ with tf.Session() as sess:
             images = sess.run(iterator)
             sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
             counter += 1
-            if counter % 10 == 0:
+            if counter % 100 == 0:
                 print("summary")
                 result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
                 writer.add_summary(result, counter)
