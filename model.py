@@ -57,9 +57,9 @@ def transfer_net(inputs, name="transfer", reuse=True):
         with tf.variable_scope(name, reuse=reuse) as vs:
             net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
             net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv2')
+            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], stride=2, scope='conv2')
             net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], scope='conv3')
+            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], stride=2, scope='conv3')
             net = slim.batch_norm(net)
 
             net = block_v1(net, 128, "residual1")
@@ -145,9 +145,21 @@ def styleloss(f1, f2, f3, f4):
     return style_loss
 
 
-def gram_matrix(input_tensor):
-    result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
-    input_shape = tf.shape(input_tensor)
-    num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
-    return result/num_locations
+# def gram_matrix(input_tensor):
+#     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
+#     input_shape = tf.shape(input_tensor)
+#     num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
+#     return result/num_locations
+
+
+def gram_matrix(layer):
+    shape = tf.shape(layer)
+    num_images = shape[0]
+    width = shape[1]
+    height = shape[2]
+    num_filters = shape[3]
+    filters = tf.reshape(layer, tf.stack([num_images, -1, num_filters]))
+    grams = tf.matmul(filters, filters, transpose_a=True) / tf.to_float(width * height * num_filters)
+
+    return grams
 
