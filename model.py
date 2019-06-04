@@ -72,7 +72,8 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = slim.batch_norm(net)
             net = layers_lib.repeat(net, 1, layers.conv2d, 32, [3, 3], scope='conv5')
             net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6')
+            net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6',
+                                    activation_fn=tf.nn.tanh)
             # net = slim.batch_norm(net)
             # net = tf.nn.tanh(net)
 
