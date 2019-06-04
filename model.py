@@ -102,7 +102,7 @@ def build_model(inputs, style):
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
     content_loss = 0.1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 100*styleloss(f1, f2, f3, f4)
+    style_loss = 500*styleloss(f1, f2, f3, f4)
 
     regularization_loss = tf.add_n(tf.losses.get_regularization_losses())
 
