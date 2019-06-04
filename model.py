@@ -100,13 +100,13 @@ def build_model(inputs, style):
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
-    content_loss = tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3))
+    content_loss = 0.05*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = styleloss(f1, f2, f3, f4)
+    style_loss = 10*styleloss(f1, f2, f3, f4)
 
     regularization_loss = tf.add_n(tf.losses.get_regularization_losses())
 
-    total_loss = 0.05*content_loss + 10*style_loss + regularization_loss
+    total_loss = content_loss + style_loss + regularization_loss
 
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
