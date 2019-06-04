@@ -53,7 +53,7 @@ def vgg_16(inputs,
 def transfer_net(inputs, name="transfer", reuse=True):
     inputs = tf.pad(inputs, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with arg_scope([layers.conv2d, slim.conv2d],
-                   weights_regularizer=slim.l2_regularizer(0.0001)):
+                   weights_regularizer=slim.l2_regularizer(0.0005)):
         with tf.variable_scope(name, reuse=reuse) as vs:
             net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
             net = slim.batch_norm(net)
@@ -103,9 +103,9 @@ def build_model(inputs, style):
 
     style_loss = styleloss(f1, f2, f3, f4)
 
-    regularization_loss = tf.add_n(slim.losses.get_regularization_losses())
+    regularization_loss = tf.add_n(tf.losses.get_regularization_losses())
 
-    total_loss = 1.0*content_loss + 100*style_loss + regularization_loss
+    total_loss = 0.05*content_loss + 0.95*style_loss + regularization_loss
 
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
