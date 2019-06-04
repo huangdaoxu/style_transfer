@@ -106,7 +106,7 @@ def build_model(inputs, style):
 
     regularization_loss = tf.add_n(tf.losses.get_regularization_losses())
 
-    total_loss = 0.05*content_loss + 0.95*style_loss + regularization_loss
+    total_loss = 0.05*content_loss + 10*style_loss + regularization_loss
 
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
