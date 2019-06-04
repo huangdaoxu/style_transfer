@@ -54,7 +54,7 @@ def vgg_16(inputs,
 def transfer_net(inputs, name="transfer", reuse=True):
     inputs = tf.pad(inputs, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with arg_scope([layers.conv2d, slim.conv2d],
-                   weights_regularizer=slim.l2_regularizer(0.0005)):
+                   weights_regularizer=slim.l2_regularizer(0.0001)):
         with tf.variable_scope(name, reuse=reuse) as vs:
             net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
             net = slim.batch_norm(net)
@@ -67,6 +67,7 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = block_v1(net, 128, "residual2")
             net = block_v1(net, 128, "residual3")
             net = block_v1(net, 128, "residual4")
+            net = slim.batch_norm(net)
 
             net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv4')
             net = slim.batch_norm(net)
