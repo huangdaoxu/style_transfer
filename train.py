@@ -10,7 +10,7 @@ style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 10
 current_epoch = 0
-batch_size = 4
+batch_size = 3
 
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
 style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
