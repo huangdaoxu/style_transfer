@@ -8,6 +8,7 @@ from tensorflow.contrib.layers.python.layers import utils
 from tensorflow.contrib.slim.nets import vgg
 from tensorflow.python.ops import variable_scope
 
+
 def vgg_16(inputs,
            scope='vgg_16'):
   """Oxford Net VGG 16-Layers version D Example.
@@ -57,9 +58,9 @@ def transfer_net(inputs, name="transfer", reuse=True):
         with tf.variable_scope(name, reuse=reuse) as vs:
             net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
             net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], stride=2, scope='conv2')
+            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], stride=1, scope='conv2')
             net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], stride=2, scope='conv3')
+            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], stride=1, scope='conv3')
             net = slim.batch_norm(net)
 
             net = block_v1(net, 128, "residual1")
@@ -67,10 +68,8 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = block_v1(net, 128, "residual3")
             net = block_v1(net, 128, "residual4")
 
-            net = img_scale(net, 2)
             net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv4')
             net = slim.batch_norm(net)
-            net = img_scale(net, 2)
             net = layers_lib.repeat(net, 1, layers.conv2d, 32, [3, 3], scope='conv5')
             net = slim.batch_norm(net)
             net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6')
@@ -163,15 +162,4 @@ def gram_matrix(layer):
     grams = tf.matmul(filters, filters, transpose_a=True) / tf.to_float(width * height * num_filters)
 
     return grams
-
-
-def img_scale(x, scale):
-    weight = x.get_shape()[1].value
-    height = x.get_shape()[2].value
-
-    try:
-        out = tf.image.resize_nearest_neighbor(x, size=(weight*scale, height*scale))
-    except:
-        out = tf.image.resize_images(x, size=[weight*scale, height*scale])
-    return out
 
