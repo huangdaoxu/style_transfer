@@ -100,9 +100,9 @@ def build_model(inputs, style):
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
-    content_loss = 1.0*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
+    content_loss = 0.5*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 100*styleloss(f1, f2, f3, f4)
+    style_loss = 200*styleloss(f1, f2, f3, f4)
 
     regularization_loss = tf.add_n(tf.losses.get_regularization_losses())
 
@@ -146,21 +146,21 @@ def styleloss(f1, f2, f3, f4):
     return style_loss
 
 
-def gram_matrix(input_tensor):
-    result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
-    input_shape = tf.shape(input_tensor)
-    num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
-    return result/num_locations
+# def gram_matrix(input_tensor):
+#     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
+#     input_shape = tf.shape(input_tensor)
+#     num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
+#     return result/num_locations
 
 
-# def gram_matrix(layer):
-#     shape = tf.shape(layer)
-#     num_images = shape[0]
-#     width = shape[1]
-#     height = shape[2]
-#     num_filters = shape[3]
-#     filters = tf.reshape(layer, tf.stack([num_images, -1, num_filters]))
-#     grams = tf.matmul(filters, filters, transpose_a=True) / tf.to_float(width * height * num_filters)
-#
-#     return grams
+def gram_matrix(layer):
+    shape = tf.shape(layer)
+    num_images = shape[0]
+    width = shape[1]
+    height = shape[2]
+    num_filters = shape[3]
+    filters = tf.reshape(layer, tf.stack([num_images, -1, num_filters]))
+    grams = tf.matmul(filters, filters, transpose_a=True) / tf.to_float(width * height * num_filters)
+
+    return grams
 
