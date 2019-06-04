@@ -67,9 +67,10 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = block_v1(net, 128, "residual3")
             net = block_v1(net, 128, "residual4")
 
-            net = slim.batch_norm(net)
+            net = img_scale(net, 2)
             net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv4')
             net = slim.batch_norm(net)
+            net = img_scale(net, 2)
             net = layers_lib.repeat(net, 1, layers.conv2d, 32, [3, 3], scope='conv5')
             net = slim.batch_norm(net)
             net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6')
@@ -162,4 +163,15 @@ def gram_matrix(layer):
     grams = tf.matmul(filters, filters, transpose_a=True) / tf.to_float(width * height * num_filters)
 
     return grams
+
+
+def img_scale(x, scale):
+    weight = x.get_shape()[1].value
+    height = x.get_shape()[2].value
+
+    try:
+        out = tf.image.resize_nearest_neighbor(x, size=(weight*scale, height*scale))
+    except:
+        out = tf.image.resize_images(x, size=[weight*scale, height*scale])
+    return out
 
