@@ -51,31 +51,38 @@ def vgg_16(inputs,
 
 
 def transfer_net(inputs, name="transfer", reuse=True):
-    inputs = inputs / 255.0
-    with tf.variable_scope(name, reuse=reuse) as vs:
-        net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
-        net = slim.batch_norm(net)
-        net = layers_lib.repeat(net, 2, layers.conv2d, 64, [3, 3], scope='conv2')
-        net = slim.batch_norm(net)
-        net = layers_lib.repeat(net, 2, layers.conv2d, 128, [3, 3], scope='conv3')
-        net = slim.batch_norm(net)
+    inputs = tf.pad(inputs, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
+    with arg_scope([layers.conv2d, slim.conv2d],
+                   weights_regularizer=slim.l2_regularizer(0.0001)):
+        with tf.variable_scope(name, reuse=reuse) as vs:
+            net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
+            net = slim.batch_norm(net)
+            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv2')
+            net = slim.batch_norm(net)
+            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], scope='conv3')
+            net = slim.batch_norm(net)
 
-        net = block_v1(net, 128, "residual1")
-        net = block_v1(net, 128, "residual2")
-        net = block_v1(net, 128, "residual3")
-        net = block_v1(net, 128, "residual4")
+            net = block_v1(net, 128, "residual1")
+            net = block_v1(net, 128, "residual2")
+            net = block_v1(net, 128, "residual3")
+            net = block_v1(net, 128, "residual4")
 
-        net = slim.batch_norm(net)
-        net = layers_lib.repeat(net, 2, layers.conv2d, 64, [3, 3], scope='conv4')
-        net = slim.batch_norm(net)
-        net = layers_lib.repeat(net, 2, layers.conv2d, 32, [3, 3], scope='conv5')
-        net = slim.batch_norm(net)
-        net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6',
-                                activation_fn=tf.nn.tanh)
+            net = slim.batch_norm(net)
+            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv4')
+            net = slim.batch_norm(net)
+            net = layers_lib.repeat(net, 1, layers.conv2d, 32, [3, 3], scope='conv5')
+            net = slim.batch_norm(net)
+            net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6')
+            net = slim.batch_norm(net)
+            net = tf.nn.tanh(net)
 
-        variables = tf.contrib.framework.get_variables(vs)
+            variables = tf.contrib.framework.get_variables(vs)
 
-        return net, variables
+            height = net.get_shape()[1].value
+            width = net.get_shape()[2].value
+            net = tf.image.crop_to_bounding_box(net, 10, 10, height - 20, width - 20)
+
+            return net, variables
 
 
 def build_model(inputs, style):
@@ -96,11 +103,13 @@ def build_model(inputs, style):
 
     style_loss = styleloss(f1, f2, f3, f4)
 
-    total_loss = 1.0*content_loss + 100*style_loss
+    regularization_loss = tf.add_n(slim.losses.get_regularization_losses())
+
+    total_loss = 1.0*content_loss + 100*style_loss + regularization_loss
 
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(total_loss, var_list=var)
 
-    return optimizer, trans, total_loss, content_loss, style_loss
+    return optimizer, trans, total_loss, content_loss, style_loss, regularization_loss
 
 
 def block_v1(inputs, filters, name):
