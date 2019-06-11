@@ -24,8 +24,8 @@ tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.scalar('losses/regularization_loss', regularization_loss)
-tf.summary.image('transformed', trans + MEAN_VALUES.reshape([1, 1, 1, 3]))
-tf.summary.image('origin', inputs + MEAN_VALUES.reshape([1, 1, 1, 3]))
+tf.summary.image('transformed', tf.clip_by_value(trans + MEAN_VALUES.reshape([1, 1, 1, 3]), 0.0, 255.0))
+tf.summary.image('origin', tf.clip_by_value(inputs + MEAN_VALUES.reshape([1, 1, 1, 3]), 0.0, 255.0))
 
 summary = tf.summary.merge_all()
 
