@@ -110,7 +110,7 @@ def build_model(inputs, style):
     inputs = tf.concat([trans, inputs, style], axis=0)
 
     with slim.arg_scope(vgg.vgg_arg_scope()):
-        _, end_points = vgg_16(inputs)
+        _, end_points = vgg_16(inputs - MEAN_VALUES)
 
     f1 = end_points["vgg_16/conv1/conv1_2"]
     f2 = end_points["vgg_16/conv2/conv2_2"]

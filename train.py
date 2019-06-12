@@ -1,17 +1,16 @@
 import glob
 
-import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import slim
 
 from model import build_model
-from utils import get_iterator, load_single_picture, MEAN_VALUES
+from utils import get_iterator, load_single_picture
 
 style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 10
 current_epoch = 0
-batch_size = 3
+batch_size = 4
 
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
 style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
@@ -25,9 +24,9 @@ tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.scalar('losses/regularization_loss', regularization_loss)
-tf.summary.image('transformed', tf.clip_by_value(trans, 0.0, 255.0))
-tf.summary.image('style', tf.clip_by_value(style, 0.0, 255.0))
-tf.summary.image('origin', tf.clip_by_value(inputs, 0.0, 255.0))
+tf.summary.image('transformed', trans)
+tf.summary.image('style', style)
+tf.summary.image('origin', inputs)
 
 summary = tf.summary.merge_all()
 
@@ -50,10 +49,10 @@ with tf.Session() as sess:
     try:
         while not coord.should_stop():
             images = sess.run(iterator)
-            sess.run([optimizer], feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])]) - MEAN_VALUES})
+            sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
             counter += 1
             if counter % 10 == 0:
-                result = sess.run(summary, feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])]) - MEAN_VALUES})
+                result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
                 writer.add_summary(result, counter)
 
     except tf.errors.OutOfRangeError:
