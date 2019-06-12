@@ -65,11 +65,11 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = slim.conv2d(net, 128, [3, 3], stride=2, scope='conv3')
             net = slim.instance_norm(net)
 
-            net = block_v1(net, 128, "residual1")
-            net = block_v1(net, 128, "residual2")
-            net = block_v1(net, 128, "residual3")
-            net = block_v1(net, 128, "residual4")
-            net = block_v1(net, 128, "residual5")
+            net = residual(net, 128, "residual1")
+            net = residual(net, 128, "residual2")
+            net = residual(net, 128, "residual3")
+            net = residual(net, 128, "residual4")
+            net = residual(net, 128, "residual5")
 
             net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
             net = slim.instance_norm(net)
@@ -95,6 +95,13 @@ def deconv2d(inputs, filters, kernel_size, strides, scale, scope):
     h0 = tf.image.resize_images(inputs, [height * scale, width * scale],
                                 tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return slim.conv2d(h0, filters, kernel_size, stride=strides, scope=scope)
+
+
+def residual(inputs, filters, name):
+    with tf.variable_scope(name_or_scope=name):
+        h0 = slim.conv2d(inputs, filters, kernel_size=[1, 1], stride=1)
+        h0 = slim.conv2d(h0, filters, kernel_size=[1, 1], stride=1)
+    return tf.add(inputs, h0)
 
 
 def build_model(inputs, style):
