@@ -71,14 +71,14 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = block_v1(net, 128, "residual4")
             net = block_v1(net, 128, "residual5")
 
-            net = deconv2d(net, 64, [3, 3], 2, scope="conv4")
+            net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
             net = slim.instance_norm(net)
-            net = deconv2d(net, 32, [3, 3], 2, scope="conv5")
+            net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
             net = slim.instance_norm(net)
-            net = deconv2d(net, 3, [9, 9], 1, scope="conv6")
+            net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
             net = slim.instance_norm(net)
             net = tf.nn.tanh(net)
-            net = (net + 1) / 2 * 255.
+            net = (net + 1) / 2 * 255.0
 
             variables = tf.contrib.framework.get_variables(vs)
 
@@ -89,10 +89,10 @@ def transfer_net(inputs, name="transfer", reuse=True):
             return net, variables
 
 
-def deconv2d(inputs, filters, kernel_size, strides, scope):
-    shape = tf.shape(inputs)
-    height, width = shape[1], shape[2]
-    h0 = tf.image.resize_images(inputs, [height * strides * 2, width * strides * 2],
+def deconv2d(inputs, filters, kernel_size, strides, scale, scope):
+    height, width = inputs.get_shape()[1].value, inputs.get_shape()[2].value
+
+    h0 = tf.image.resize_images(inputs, [height * scale, width * scale],
                                 tf.image.ResizeMethod.NEAREST_NEIGHBOR)
     return slim.conv2d(h0, filters, kernel_size, stride=strides, scope=scope)
 
