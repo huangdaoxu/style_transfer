@@ -17,13 +17,11 @@ style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style"
 
 iterator = get_iterator(glob.glob("/home/hdx/data/coco/val2017/*.jpg"), batch_size, epoch)
 
-optimizer, trans, total_loss, content_loss, \
-    style_loss, regularization_loss = build_model(inputs, style)
+optimizer, trans, total_loss, content_loss, style_loss = build_model(inputs, style)
 
 tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
-tf.summary.scalar('losses/regularization_loss', regularization_loss)
 tf.summary.image('transformed', trans)
 tf.summary.image('style', style)
 tf.summary.image('origin', inputs)

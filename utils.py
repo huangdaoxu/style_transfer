@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape([1, 1, 3])
+MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape([1, 1, 1, 3])
 
 
 def load_single_picture(filename, width=256, height=256):
@@ -10,7 +10,6 @@ def load_single_picture(filename, width=256, height=256):
     image = tf.image.decode_jpeg(image_raw_data, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize_images(image, size=(width, height))
-    #image -= MEAN_VALUES
     return image
 
 
@@ -23,7 +22,6 @@ def get_iterator(path, batch_size, num_epochs, width=256, height=256):
 
     image = tf.image.convert_image_dtype(tf.image.decode_jpeg(value, channels=3), tf.float32)
     image = tf.image.resize_images(image, size=(width, height))
-    #image -= MEAN_VALUES
 
     image_batch = tf.train.batch([image], batch_size=batch_size)
     return image_batch
