@@ -5,7 +5,6 @@ from tensorflow.contrib import layers
 from tensorflow.contrib.framework.python.ops import arg_scope
 from tensorflow.contrib.layers.python.layers import layers as layers_lib
 from tensorflow.contrib.layers.python.layers import utils
-from tensorflow.contrib.slim.nets import vgg
 from tensorflow.python.ops import variable_scope
 
 from utils import MEAN_VALUES
@@ -106,8 +105,7 @@ def build_model(inputs, style):
 
     inputs = tf.concat([trans, inputs, style], axis=0)
 
-    with slim.arg_scope(vgg.vgg_arg_scope()):
-        _, end_points = vgg_16(inputs - MEAN_VALUES)
+    _, end_points = vgg_16(inputs - MEAN_VALUES)
 
     f1 = end_points["vgg_16/conv1/conv1_2"]
     f2 = end_points["vgg_16/conv2/conv2_2"]

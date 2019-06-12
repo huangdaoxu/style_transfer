@@ -8,7 +8,7 @@ from utils import get_iterator, load_single_picture
 
 style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
-epoch = 10
+epoch = 20
 current_epoch = 0
 batch_size = 4
 
@@ -23,23 +23,25 @@ tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.image('transformed', trans)
-tf.summary.image('style', style)
 tf.summary.image('origin', inputs)
 
 summary = tf.summary.merge_all()
 
-# load pre-trained parameters
-vgg_vars = slim.get_variables_to_restore(include=['vgg_16'])
-variable_restore_op = slim.assign_from_checkpoint_fn("./vgg_16.ckpt",
-                                                     vgg_vars,
-                                                     ignore_missing_vars=True)
-
 with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
+    # load pre-trained parameters
+    vgg_vars = slim.get_variables_to_restore(include=['vgg_16'])
+    variable_restore_op = slim.assign_from_checkpoint_fn("./vgg_16.ckpt",
+                                                         vgg_vars,
+                                                         ignore_missing_vars=True)
+    variable_restore_op(sess)
+
+    all_var = tf.global_variables()
+    init_var = [v for v in all_var if 'vgg_16' not in v.name]
+    init = tf.variables_initializer(var_list=init_var)
+    sess.run(init)
     sess.run(tf.local_variables_initializer())
     style_pic = sess.run(style_pic)
     writer = tf.summary.FileWriter("./tensorboard/", sess.graph)
-    variable_restore_op(sess)
 
     coord = tf.train.Coordinator()
     thread = tf.train.start_queue_runners(sess=sess, coord=coord)
