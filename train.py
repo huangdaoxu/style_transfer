@@ -1,5 +1,6 @@
 import glob
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import slim
 
@@ -24,8 +25,8 @@ tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.scalar('losses/regularization_loss', regularization_loss)
-tf.summary.image('transformed', tf.clip_by_value(trans + MEAN_VALUES.reshape([1, 1, 1, 3]), 0.0, 255.0))
-tf.summary.image('origin', tf.clip_by_value(inputs + MEAN_VALUES.reshape([1, 1, 1, 3]), 0.0, 255.0))
+tf.summary.image('transformed', tf.clip_by_value(trans, 0.0, 255.0))
+tf.summary.image('origin', tf.clip_by_value(inputs, 0.0, 255.0))
 
 summary = tf.summary.merge_all()
 
@@ -48,10 +49,10 @@ with tf.Session() as sess:
     try:
         while not coord.should_stop():
             images = sess.run(iterator)
-            sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+            sess.run([optimizer], feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])]) - MEAN_VALUES})
             counter += 1
             if counter % 10 == 0:
-                result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+                result = sess.run(summary, feed_dict={inputs: images, style: np.array([style_pic for _ in range(images.shape[0])]) - MEAN_VALUES})
                 writer.add_summary(result, counter)
 
     except tf.errors.OutOfRangeError:

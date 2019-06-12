@@ -8,6 +8,8 @@ from tensorflow.contrib.layers.python.layers import utils
 from tensorflow.contrib.slim.nets import vgg
 from tensorflow.python.ops import variable_scope
 
+from utils import MEAN_VALUES
+
 
 def vgg_16(inputs,
            scope='vgg_16'):
@@ -52,30 +54,31 @@ def vgg_16(inputs,
 
 
 def transfer_net(inputs, name="transfer", reuse=True):
-    inputs = tf.pad(inputs, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
+    inputs = tf.pad(inputs - MEAN_VALUES, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with arg_scope([layers.conv2d, slim.conv2d],
                    weights_regularizer=slim.l2_regularizer(0.0001)):
         with tf.variable_scope(name, reuse=reuse) as vs:
-            net = layers_lib.repeat(inputs, 1, layers.conv2d, 32, [9, 9], scope='conv1')
-            net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], stride=1, scope='conv2')
-            net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 128, [3, 3], stride=1, scope='conv3')
-            net = slim.batch_norm(net)
+            net = slim.conv2d(inputs, 32, [9, 9], stride=1, scope='conv1')
+            net = slim.instance_norm(net)
+            net = slim.conv2d(net, 64, [3, 3], stride=2, scope='conv2')
+            net = slim.instance_norm(net)
+            net = slim.conv2d(net, 128, [3, 3], stride=2, scope='conv3')
+            net = slim.instance_norm(net)
 
             net = block_v1(net, 128, "residual1")
             net = block_v1(net, 128, "residual2")
             net = block_v1(net, 128, "residual3")
             net = block_v1(net, 128, "residual4")
+            net = block_v1(net, 128, "residual5")
 
-            net = layers_lib.repeat(net, 1, layers.conv2d, 64, [3, 3], scope='conv4')
-            net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 32, [3, 3], scope='conv5')
-            net = slim.batch_norm(net)
-            net = layers_lib.repeat(net, 1, layers.conv2d, 3, [9, 9], scope='conv6',
-                                    activation_fn=tf.nn.tanh)
-            # net = slim.batch_norm(net)
-            # net = tf.nn.tanh(net)
+            net = deconv2d(net, 64, [3, 3], 2, scope="conv4")
+            net = slim.instance_norm(net)
+            net = deconv2d(net, 32, [3, 3], 2, scope="conv5")
+            net = slim.instance_norm(net)
+            net = deconv2d(net, 3, [9, 9], 1, scope="conv6")
+            net = slim.instance_norm(net)
+            net = tf.nn.tanh(net)
+            net = (net + 1) / 2 * 255.
 
             variables = tf.contrib.framework.get_variables(vs)
 
@@ -84,6 +87,14 @@ def transfer_net(inputs, name="transfer", reuse=True):
             net = tf.image.crop_to_bounding_box(net, 10, 10, height - 20, width - 20)
 
             return net, variables
+
+
+def deconv2d(inputs, filters, kernel_size, strides, scope):
+    shape = tf.shape(inputs)
+    height, width = shape[1], shape[2]
+    h0 = tf.image.resize_images(inputs, [height * strides * 2, width * strides * 2],
+                                tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    return slim.conv2d(h0, filters, kernel_size, stride=strides, scope=scope)
 
 
 def build_model(inputs, style):
@@ -100,7 +111,7 @@ def build_model(inputs, style):
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
-    content_loss = 0.5*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
+    content_loss = 1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
     style_loss = 200*styleloss(f1, f2, f3, f4)
 
