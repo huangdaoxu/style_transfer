@@ -5,6 +5,7 @@ from tensorflow.contrib import layers
 from tensorflow.contrib.framework.python.ops import arg_scope
 from tensorflow.contrib.layers.python.layers import layers as layers_lib
 from tensorflow.contrib.layers.python.layers import utils
+from tensorflow.contrib.slim.nets import vgg
 from tensorflow.python.ops import variable_scope
 
 from utils import MEAN_VALUES
@@ -52,15 +53,23 @@ def vgg_16(inputs,
     return net, end_points
 
 
+def transfer_arg_scope():
+    with slim.arg_scope([slim.conv2d, slim.conv2d_transpose],
+                        activation_fn=None,
+                        biases_initializer=tf.zeros_initializer()):
+        with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], padding='SAME') as arg_sc:
+            return arg_sc
+
+
 def transfer_net(inputs, name="transfer", reuse=True):
     inputs = tf.pad(inputs - MEAN_VALUES, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with tf.variable_scope(name, reuse=reuse) as vs:
         net = slim.conv2d(inputs, 32, [9, 9], stride=1, scope='conv1')
-        net = slim.instance_norm(net)
+        net = slim.relu(slim.instance_norm(net))
         net = slim.conv2d(net, 64, [3, 3], stride=2, scope='conv2')
-        net = slim.instance_norm(net)
+        net = slim.relu(slim.instance_norm(net))
         net = slim.conv2d(net, 128, [3, 3], stride=2, scope='conv3')
-        net = slim.instance_norm(net)
+        net = slim.relu(slim.instance_norm(net))
 
         net = residual(net, 128, "residual1")
         net = residual(net, 128, "residual2")
@@ -69,9 +78,9 @@ def transfer_net(inputs, name="transfer", reuse=True):
         net = residual(net, 128, "residual5")
 
         net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
-        net = slim.instance_norm(net)
+        net = slim.relu(slim.instance_norm(net))
         net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
-        net = slim.instance_norm(net)
+        net = slim.relu(slim.instance_norm(net))
         net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
         net = slim.instance_norm(net)
         net = tf.nn.tanh(net)
@@ -101,11 +110,13 @@ def residual(inputs, filters, name):
 
 
 def build_model(inputs, style):
-    trans, var = transfer_net(inputs, reuse=False)
+    with slim.arg_scope(transfer_arg_scope()):
+        trans, var = transfer_net(inputs, reuse=False)
 
     inputs = tf.concat([trans, inputs, style], axis=0)
 
-    _, end_points = vgg_16(inputs - MEAN_VALUES)
+    with slim.arg_scope(vgg.vgg_arg_scope()):
+        _, end_points = vgg_16(inputs - MEAN_VALUES)
 
     f1 = end_points["vgg_16/conv1/conv1_2"]
     f2 = end_points["vgg_16/conv2/conv2_2"]
@@ -115,7 +126,7 @@ def build_model(inputs, style):
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
     content_loss = 1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 100*styleloss(f1, f2, f3, f4)
+    style_loss = 200*styleloss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 
