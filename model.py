@@ -95,8 +95,8 @@ def deconv2d(inputs, filters, kernel_size, strides, scale, scope):
 
 def residual(inputs, filters, name):
     with tf.variable_scope(name_or_scope=name):
-        h0 = slim.conv2d(inputs, filters, kernel_size=[1, 1], stride=1)
-        h0 = slim.conv2d(h0, filters, kernel_size=[1, 1], stride=1)
+        h0 = slim.conv2d(inputs, filters, kernel_size=[3, 3], stride=1)
+        h0 = slim.conv2d(h0, filters, kernel_size=[3, 3], stride=1)
     return tf.add(inputs, h0)
 
 
@@ -115,7 +115,7 @@ def build_model(inputs, style):
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
     content_loss = 1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 200*styleloss(f1, f2, f3, f4)
+    style_loss = 100*styleloss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 
