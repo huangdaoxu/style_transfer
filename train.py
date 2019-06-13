@@ -8,7 +8,7 @@ from utils import get_iterator, load_single_picture
 
 style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
-epoch = 20
+epoch = 50
 current_epoch = 0
 batch_size = 4
 
