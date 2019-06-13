@@ -85,7 +85,7 @@ def transfer_net(inputs, name="transfer", reuse=True):
         net = slim.conv2d_transpose(net, 32, [3, 3], 2, scope="conv5")
         net = tf.nn.relu(slim.instance_norm(net))
         # net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
-        net = slim.conv2d_transpose(net, 3, [3, 3], 1, scope="conv6")
+        net = slim.conv2d_transpose(net, 3, [9, 9], 1, scope="conv6")
         net = slim.instance_norm(net)
         net = tf.nn.tanh(net)
         net = (net + 1) / 2 * 255.0
