@@ -78,14 +78,14 @@ def transfer_net(inputs, name="transfer", reuse=True):
         net = residual(net, 128, "residual4")
         net = residual(net, 128, "residual5")
 
-        # net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
-        net = slim.conv2d_transpose(net, 64, [3, 3], 2, scope="conv4")
+        net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
+        # net = slim.conv2d_transpose(net, 64, [3, 3], 2, scope="conv4")
         net = tf.nn.relu(slim.instance_norm(net))
-        # net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
-        net = slim.conv2d_transpose(net, 32, [3, 3], 2, scope="conv5")
+        net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
+        # net = slim.conv2d_transpose(net, 32, [3, 3], 2, scope="conv5")
         net = tf.nn.relu(slim.instance_norm(net))
-        # net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
-        net = slim.conv2d_transpose(net, 3, [9, 9], 1, scope="conv6")
+        net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
+        # net = slim.conv2d_transpose(net, 3, [9, 9], 1, scope="conv6")
         net = slim.instance_norm(net)
         net = tf.nn.tanh(net)
         net = (net + 1) / 2 * 255.0
@@ -132,11 +132,11 @@ def build_model(inputs, style):
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
     content_loss = 1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 200*styleloss(f1, f2, f3, f4)
+    style_loss = 100*styleloss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 
-    optimizer = tf.train.AdamOptimizer(1.0).minimize(total_loss, var_list=var)
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(total_loss, var_list=var)
 
     return optimizer, trans, total_loss, content_loss, style_loss
 
