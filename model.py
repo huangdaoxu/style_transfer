@@ -66,11 +66,11 @@ def transfer_net(inputs, name="transfer", reuse=True):
     inputs = tf.pad(inputs - MEAN_VALUES, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with tf.variable_scope(name, reuse=reuse) as vs:
         net = slim.conv2d(inputs, 32, [9, 9], stride=1, scope='conv1')
-        net = slim.relu(slim.instance_norm(net))
+        net = tf.nn.relu(slim.instance_norm(net))
         net = slim.conv2d(net, 64, [3, 3], stride=2, scope='conv2')
-        net = slim.relu(slim.instance_norm(net))
+        net = tf.nn.relu(slim.instance_norm(net))
         net = slim.conv2d(net, 128, [3, 3], stride=2, scope='conv3')
-        net = slim.relu(slim.instance_norm(net))
+        net = tf.nn.relu(slim.instance_norm(net))
 
         net = residual(net, 128, "residual1")
         net = residual(net, 128, "residual2")
@@ -79,9 +79,9 @@ def transfer_net(inputs, name="transfer", reuse=True):
         net = residual(net, 128, "residual5")
 
         net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
-        net = slim.relu(slim.instance_norm(net))
+        net = tf.nn.relu(slim.instance_norm(net))
         net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
-        net = slim.relu(slim.instance_norm(net))
+        net = tf.nn.relu(slim.instance_norm(net))
         net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
         net = slim.instance_norm(net)
         net = tf.nn.tanh(net)
@@ -106,7 +106,9 @@ def deconv2d(inputs, filters, kernel_size, strides, scale, scope):
 def residual(inputs, filters, name):
     with tf.variable_scope(name_or_scope=name):
         h0 = slim.conv2d(inputs, filters, kernel_size=[3, 3], stride=1)
+        h0 = tf.nn.relu(h0)
         h0 = slim.conv2d(h0, filters, kernel_size=[3, 3], stride=1)
+        h0 = tf.nn.relu(h0)
     return tf.add(inputs, h0)
 
 
