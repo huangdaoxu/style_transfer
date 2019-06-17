@@ -63,7 +63,7 @@ def transfer_arg_scope(weight_decay=0.0005):
 
 
 def transfer_net(inputs, name="transfer", reuse=True):
-    inputs = tf.pad(inputs - MEAN_VALUES, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
+    inputs = tf.pad(inputs, [[0, 0], [10, 10], [10, 10], [0, 0]], mode='REFLECT')
     with tf.variable_scope(name, reuse=reuse) as vs:
         net = slim.conv2d(inputs, 32, [9, 9], stride=1, scope='conv1')
         net = tf.nn.relu(slim.instance_norm(net))
@@ -115,7 +115,7 @@ def build_model(inputs, style):
     with slim.arg_scope(transfer_arg_scope()):
         trans, var = transfer_net(inputs, reuse=False)
 
-    inputs = tf.concat([trans, inputs - MEAN_VALUES, style], axis=0)
+    inputs = tf.concat([trans, inputs, style], axis=0)
 
     # with slim.arg_scope(vgg.vgg_arg_scope()):
     #     _, end_points = vgg_16(inputs - MEAN_VALUES)
