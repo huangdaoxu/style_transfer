@@ -115,10 +115,12 @@ def build_model(inputs, style):
     with slim.arg_scope(transfer_arg_scope()):
         trans, var = transfer_net(inputs, reuse=False)
 
-    inputs = tf.concat([trans, inputs, style], axis=0)
+    inputs = tf.concat([trans, inputs - MEAN_VALUES, style - MEAN_VALUES], axis=0)
 
-    with slim.arg_scope(vgg.vgg_arg_scope()):
-        _, end_points = vgg_16(inputs - MEAN_VALUES)
+    # with slim.arg_scope(vgg.vgg_arg_scope()):
+    #     _, end_points = vgg_16(inputs - MEAN_VALUES)
+
+    _, end_points = vgg.vgg_16(inputs, spatial_squeeze=False)
 
     f1 = end_points["vgg_16/conv1/conv1_2"]
     f2 = end_points["vgg_16/conv2/conv2_2"]
