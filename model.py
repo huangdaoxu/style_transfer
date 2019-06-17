@@ -215,8 +215,8 @@ def _single_style_loss(a, g):
     :param g: 当前layer生成图片的feature map
     :return: style loss
     """
-    N = a.get_shape[3]
-    M = a.get_shape[1] * a.get_shape[2]
+    N = a.get_shape()[3]
+    M = a.get_shape()[1] * a.get_shape()[2]
 
     # 生成feature map的Gram Matrix
     A = _gram_matrix(a, N, M)
