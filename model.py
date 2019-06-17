@@ -130,9 +130,9 @@ def build_model(inputs, style):
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
-    content_loss = 0.1*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
+    content_loss = 1.0*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 10*styleloss(f1, f2, f3, f4)
+    style_loss = 100*_style_loss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 
@@ -192,3 +192,55 @@ def gram_matrix(layer):
 
     return grams
 
+
+def _gram_matrix(F, N, M):
+    """
+    构造F的Gram Matrix（格雷姆矩阵），F为feature map，shape=(widths, heights, channels)
+
+    :param F: feature map
+    :param N: feature map的第三维度
+    :param M: feature map的第一维 乘 第二维
+    :return: F的Gram Matrix
+    """
+    F = tf.reshape(F, (M, N))
+
+    return tf.matmul(tf.transpose(F), F)
+
+
+def _single_style_loss(a, g):
+    """
+    计算单层style loss
+
+    :param a: 当前layer风格图片的feature map
+    :param g: 当前layer生成图片的feature map
+    :return: style loss
+    """
+    N = a.shape[3]
+    M = a.shape[1] * a.shape[2]
+
+    # 生成feature map的Gram Matrix
+    A = _gram_matrix(a, N, M)
+    G = _gram_matrix(g, N, M)
+
+    return tf.reduce_sum(tf.square(G - A)) / ((2 * N * M) ** 2)
+
+
+def _style_loss(f1, f2, f3, f4):
+    """
+    计算总的style loss
+
+    :param A: 风格图片的所有feature map
+    """
+    gen_f, _, style_f = tf.split(f1, 3, 0)
+    style_loss = _single_style_loss(gen_f, style_f)
+
+    gen_f, _, style_f = tf.split(f2, 3, 0)
+    style_loss += _single_style_loss(gen_f, style_f)
+
+    gen_f, _, style_f = tf.split(f3, 3, 0)
+    style_loss += _single_style_loss(gen_f, style_f)
+
+    gen_f, _, style_f = tf.split(f4, 3, 0)
+    style_loss += _single_style_loss(gen_f, style_f)
+
+    return style_loss
