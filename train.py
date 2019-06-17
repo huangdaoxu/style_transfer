@@ -9,7 +9,6 @@ from utils import get_iterator, load_single_picture
 style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 50
-current_epoch = 0
 batch_size = 4
 
 inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
@@ -40,7 +39,6 @@ with tf.Session() as sess:
 
     all_var = tf.global_variables()
     init_var = [v for v in all_var if 'vgg_16' not in v.name]
-    print(init_var)
     init = tf.variables_initializer(var_list=init_var)
     sess.run(init)
     sess.run(tf.local_variables_initializer())
@@ -49,14 +47,17 @@ with tf.Session() as sess:
 
     coord = tf.train.Coordinator()
     thread = tf.train.start_queue_runners(sess=sess, coord=coord)
-    counter = 1
+    counter = 0
     try:
         while not coord.should_stop():
             images = sess.run(iterator)
-            sess.run([optimizer], feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+            feed_dict = {inputs: images,
+                         style: [style_pic for _ in range(images.shape[0])]}
+            sess.run([optimizer], feed_dict=feed_dict)
             counter += 1
             if counter % 10 == 0:
-                result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
+                result = sess.run(summary, feed_dict=feed_dict)
+                print(counter)
                 writer.add_summary(result, counter)
 
             if counter % 1000 == 0:
