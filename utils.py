@@ -10,6 +10,7 @@ def load_single_picture(filename, width=256, height=256):
     image = tf.image.decode_jpeg(image_raw_data, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize_images(image, size=(width, height))
+    image *= 255.0
     return image
 
 
@@ -21,8 +22,9 @@ def get_iterator(path, batch_size, num_epochs, width=256, height=256):
     _, value = reader.read(images_queue)
 
     image = tf.image.convert_image_dtype(tf.image.decode_jpeg(value, channels=3), tf.float32)
-    # image = tf.image.resize_images(image, size=(width, height))
-    image = preprocess_for_train(image, output_height=height, output_width=width)
+    image = tf.image.resize_images(image, size=(width, height))
+    # image = preprocess_for_train(image, output_height=height, output_width=width)
+    image *= 255.0
     image_batch = tf.train.batch([image], batch_size=batch_size)
     return image_batch
 
