@@ -24,6 +24,7 @@ tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.image('transformed', trans)
 tf.summary.image('origin', inputs)
+tf.summary.image('style', style)
 
 summary = tf.summary.merge_all()
 
