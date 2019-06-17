@@ -215,14 +215,14 @@ def _single_style_loss(a, g):
     :param g: 当前layer生成图片的feature map
     :return: style loss
     """
-    N = a.shape[3]
-    M = a.shape[1] * a.shape[2]
+    N = a.get_shape[3]
+    M = a.get_shape[1] * a.get_shape[2]
 
     # 生成feature map的Gram Matrix
     A = _gram_matrix(a, N, M)
     G = _gram_matrix(g, N, M)
 
-    return tf.reduce_sum(tf.square(G - A)) / tf.cast(tf.pow(2 * N * M, 2), tf.float32)
+    return tf.reduce_sum(tf.square(G - A)) / ((2 * N * M) ** 2)
 
 
 def _style_loss(f1, f2, f3, f4):
