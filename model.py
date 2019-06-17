@@ -79,22 +79,19 @@ def transfer_net(inputs, name="transfer", reuse=True):
         net = residual(net, 128, "residual5")
 
         net = deconv2d(net, 64, [3, 3], 1, scale=2, scope="conv4")
-        # net = slim.conv2d_transpose(net, 64, [3, 3], 2, scope="conv4")
         net = tf.nn.relu(slim.instance_norm(net))
         net = deconv2d(net, 32, [3, 3], 1, scale=2, scope="conv5")
-        # net = slim.conv2d_transpose(net, 32, [3, 3], 2, scope="conv5")
         net = tf.nn.relu(slim.instance_norm(net))
         net = deconv2d(net, 3, [9, 9], 1, scale=1, scope="conv6")
-        # net = slim.conv2d_transpose(net, 3, [9, 9], 1, scope="conv6")
-        net = slim.instance_norm(net)
-        net = tf.nn.tanh(net)
-        net = (net + 1) / 2 * 255.0
+        net = tf.nn.tanh(slim.instance_norm(net))
+        net = (net + 1.0) / 2 * 255.0
 
         variables = tf.contrib.framework.get_variables(vs)
 
         height = net.get_shape()[1].value
         width = net.get_shape()[2].value
-        net = tf.image.crop_to_bounding_box(net, 10, 10, height - 20, width - 20)
+        net = tf.slice(net, [0, 10, 10, 0], tf.stack([-1, height - 20, width - 20, -1]))
+        # net = tf.image.crop_to_bounding_box(net, 10, 10, height - 20, width - 20)
         return net, variables
 
 
@@ -111,7 +108,6 @@ def residual(inputs, filters, name):
         h0 = slim.conv2d(inputs, filters, kernel_size=[3, 3], stride=1)
         h0 = tf.nn.relu(h0)
         h0 = slim.conv2d(h0, filters, kernel_size=[3, 3], stride=1)
-        h0 = tf.nn.relu(h0)
     return tf.add(inputs, h0)
 
 
@@ -132,7 +128,7 @@ def build_model(inputs, style):
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
     content_loss = 1.0*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
 
-    style_loss = 100*_style_loss(f1, f2, f3, f4)
+    style_loss = 200*styleloss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 
@@ -192,55 +188,3 @@ def gram_matrix(layer):
 
     return grams
 
-
-def _gram_matrix(F, N, M):
-    """
-    构造F的Gram Matrix（格雷姆矩阵），F为feature map，shape=(widths, heights, channels)
-
-    :param F: feature map
-    :param N: feature map的第三维度
-    :param M: feature map的第一维 乘 第二维
-    :return: F的Gram Matrix
-    """
-    F = tf.reshape(F, (M, N))
-
-    return tf.matmul(tf.transpose(F), F)
-
-
-def _single_style_loss(a, g):
-    """
-    计算单层style loss
-
-    :param a: 当前layer风格图片的feature map
-    :param g: 当前layer生成图片的feature map
-    :return: style loss
-    """
-    N = a.get_shape()[3]
-    M = a.get_shape()[1] * a.get_shape()[2]
-
-    # 生成feature map的Gram Matrix
-    A = _gram_matrix(a, N, M)
-    G = _gram_matrix(g, N, M)
-
-    return tf.reduce_sum(tf.square(G - A)) / tf.cast(tf.pow(2 * N * M, 2), tf.float32)
-
-
-def _style_loss(f1, f2, f3, f4):
-    """
-    计算总的style loss
-
-    :param A: 风格图片的所有feature map
-    """
-    gen_f, _, style_f = tf.split(f1, 3, 0)
-    style_loss = _single_style_loss(gen_f, style_f)
-
-    gen_f, _, style_f = tf.split(f2, 3, 0)
-    style_loss += _single_style_loss(gen_f, style_f)
-
-    gen_f, _, style_f = tf.split(f3, 3, 0)
-    style_loss += _single_style_loss(gen_f, style_f)
-
-    gen_f, _, style_f = tf.split(f4, 3, 0)
-    style_loss += _single_style_loss(gen_f, style_f)
-
-    return style_loss

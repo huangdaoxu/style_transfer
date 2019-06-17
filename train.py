@@ -35,8 +35,12 @@ with tf.Session() as sess:
                                                          ignore_missing_vars=True)
     variable_restore_op(sess)
 
+    variables_to_save = slim.get_variables_to_restore(include=['transfer'])
+    saver = tf.train.Saver(variables_to_save)
+
     all_var = tf.global_variables()
     init_var = [v for v in all_var if 'vgg_16' not in v.name]
+    print(init_var)
     init = tf.variables_initializer(var_list=init_var)
     sess.run(init)
     sess.run(tf.local_variables_initializer())
@@ -54,6 +58,10 @@ with tf.Session() as sess:
             if counter % 10 == 0:
                 result = sess.run(summary, feed_dict={inputs: images, style: [style_pic for _ in range(images.shape[0])]})
                 writer.add_summary(result, counter)
+
+            if counter % 1000 == 0:
+                # save model parameters
+                saver.save(sess, ('trained_model/' + 'model.ckpt'), global_step=counter)
 
     except tf.errors.OutOfRangeError:
         coord.request_stop()
