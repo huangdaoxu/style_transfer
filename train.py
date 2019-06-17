@@ -5,7 +5,7 @@ from tensorflow.contrib import slim
 
 from model import build_model
 from utils import get_iterator, load_single_picture
-from utils import MEAN_VALUES
+from utils import _mean_image_subtraction
 
 style_pic = load_single_picture("/home/hdx/data/coco/wave.jpg")
 
@@ -23,7 +23,7 @@ tf.summary.scalar('losses/total_loss', total_loss)
 tf.summary.scalar('losses/content_loss', content_loss)
 tf.summary.scalar('losses/style_loss', style_loss)
 tf.summary.image('transformed', trans)
-tf.summary.image('origin', inputs - MEAN_VALUES)
+tf.summary.image('origin', inputs)
 
 summary = tf.summary.merge_all()
 

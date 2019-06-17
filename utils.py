@@ -22,12 +22,12 @@ def get_iterator(path, batch_size, num_epochs, width=256, height=256):
 
     image = tf.image.convert_image_dtype(tf.image.decode_jpeg(value, channels=3), tf.float32)
     image = tf.image.resize_images(image, size=(width, height))
-
+    image = _mean_image_subtraction(image)
     image_batch = tf.train.batch([image], batch_size=batch_size)
     return image_batch
 
 
-def _mean_image_subtraction(image, means=MEAN_VALUES):
+def _mean_image_subtraction(image, means=[123.68, 116.779, 103.939]):
     """Subtracts the given means from each image channel.
 
     For example:
