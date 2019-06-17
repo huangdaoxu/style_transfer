@@ -222,7 +222,7 @@ def _single_style_loss(a, g):
     A = _gram_matrix(a, N, M)
     G = _gram_matrix(g, N, M)
 
-    return tf.reduce_sum(tf.square(G - A)) / tf.pow(tf.cast(2 * N * M, tf.int64), 2)
+    return tf.reduce_sum(tf.square(G - A)) / tf.cast(tf.pow(2 * N * M, 2), tf.float32)
 
 
 def _style_loss(f1, f2, f3, f4):
