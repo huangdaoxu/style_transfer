@@ -7,7 +7,7 @@ from model import build_model
 from utils import get_iterator, load_single_picture
 from utils import MEAN_VALUES
 
-style_pic = load_single_picture("/home/hdx/data/coco/wave.jpg")
+style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
 
 epoch = 50
 batch_size = 4
