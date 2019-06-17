@@ -172,13 +172,6 @@ def styleloss(f1, f2, f3, f4):
     return style_loss
 
 
-# def gram_matrix(input_tensor):
-#     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
-#     input_shape = tf.shape(input_tensor)
-#     num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
-#     return result/num_locations
-
-
 def gram_matrix(layer):
     shape = tf.shape(layer)
     num_images = shape[0]
