@@ -18,6 +18,8 @@ flags.DEFINE_float('style_loss_weight', 100.0, "style loss weight")
 flags.DEFINE_string("summary_path", "./tensorboard/wave/", "tensorboard file path")
 flags.DEFINE_string("vgg_path", "./vgg_16.ckpt", "pre-trained vgg file path")
 flags.DEFINE_string("model_path", "trained_model/wave/model.ckpt", "model path")
+flags.DEFINE_string("style_image_path", "/home/hdx/data/coco/wave.jpg", "style image path")
+flags.DEFINE_string("train_dataset", "/home/hdx/data/coco/val2017/*.jpg", "dataset for fit")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -27,9 +29,9 @@ def main(_):
     style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
 
     # init image data
-    style_image = load_image("/home/hdx/data/coco/wave.jpg")
+    style_image = load_image(FLAGS.style_image_path)
     iterator = get_iterator(
-        glob.glob("/home/hdx/data/coco/val2017/*.jpg"),
+        glob.glob(FLAGS.train_dataset),
         FLAGS.batch_size, FLAGS.epoch)
 
     #build transfer model
