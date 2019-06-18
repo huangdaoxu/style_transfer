@@ -57,7 +57,6 @@ with tf.Session() as sess:
             counter += 1
             if counter % 10 == 0:
                 result = sess.run(summary, feed_dict=feed_dict)
-                print(counter)
                 writer.add_summary(result, counter)
 
             if counter % 1000 == 0:
