@@ -11,6 +11,7 @@ flags = tf.app.flags
 ############################
 flags.DEFINE_string("test_image", "./test/sunshine_boy.jpeg", "test image path")
 flags.DEFINE_string("model_path", "./trained_model/starry/model.ckpt-49000", "meta path")
+flags.DEFINE_string("saved_path", "./test/inference_starry.jpg", "transfromed image path")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -28,7 +29,7 @@ def main(_):
         image_encode = tf.image.resize_images(img[0], (256, 256), method=1)
         image_encode = tf.image.convert_image_dtype(image_encode, dtype=tf.uint8)
         image_encode = tf.image.encode_jpeg(image_encode)
-        image_saver = tf.gfile.FastGFile("./test/inference_starry.jpg", "w+")
+        image_saver = tf.gfile.FastGFile(FLAGS.saved_path, "w+")
         image_saver.write(sess.run(image_encode))
         image_saver.close()
 
