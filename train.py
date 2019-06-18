@@ -4,9 +4,9 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 
 from model import build_model
-from utils import get_iterator, load_single_picture
+from utils import get_iterator, load_style_image
 
-style_pic = load_single_picture("/home/hdx/data/coco/landscape.jpg")
+style_pic = load_style_image("/home/hdx/data/coco/landscape.jpg")
 
 epoch = 50
 batch_size = 4
