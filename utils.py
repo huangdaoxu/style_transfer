@@ -5,7 +5,7 @@ import numpy as np
 MEAN_VALUES = np.array([123.68, 116.779, 103.939]).reshape([1, 1, 1, 3])
 
 
-def load_style_image(filename, width=256, height=256):
+def load_image(filename, width=256, height=256):
     image_raw_data = tf.gfile.FastGFile(filename, 'rb').read()
     image = tf.image.decode_jpeg(image_raw_data, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)

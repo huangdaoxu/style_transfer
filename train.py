@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 
 from model import build_model
-from utils import get_iterator, load_style_image
+from utils import get_iterator, load_image
 
 flags = tf.app.flags
 ############################
@@ -21,13 +21,13 @@ flags.DEFINE_string("model_path", "trained_model/wave/model.ckpt", "model path")
 
 FLAGS = tf.app.flags.FLAGS
 
-def main():
+def main(_):
     # create input tensor
     inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
     style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
 
     # init image data
-    style_image = load_style_image("/home/hdx/data/coco/landscape.jpg")
+    style_image = load_image("/home/hdx/data/coco/wave.jpg")
     iterator = get_iterator(
         glob.glob("/home/hdx/data/coco/val2017/*.jpg"),
         FLAGS.batch_size, FLAGS.epoch)
