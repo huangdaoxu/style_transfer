@@ -30,7 +30,7 @@ tensorboard --logdir "your summary path" --port 8888
 
 **Last**, you can use trained model to inference.
 ```
-python inference.py --test_image "test image" --model_path "your transfer model path"
+python inference.py --test_image "test image" --model_path "your transfer model path" --saved_path "transfromed image path"
 ```
 
 ## Results
