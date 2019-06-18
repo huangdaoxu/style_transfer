@@ -15,10 +15,10 @@ flags.DEFINE_integer("batch_size", 4, "batch size")
 flags.DEFINE_float('learning_rate', 0.002, "learning rate")
 flags.DEFINE_float('content_loss_weight', 1.0, "content loss weight")
 flags.DEFINE_float('style_loss_weight', 100.0, "style loss weight")
-flags.DEFINE_string("summary_path", "./tensorboard/wave/", "tensorboard file path")
+flags.DEFINE_string("summary_path", "./tensorboard/candy/", "tensorboard file path")
 flags.DEFINE_string("vgg_path", "./vgg_16.ckpt", "pre-trained vgg file path")
-flags.DEFINE_string("model_path", "./trained_model/wave/model.ckpt", "model path")
-flags.DEFINE_string("style_image_path", "./style_images/wave.jpg", "style image path")
+flags.DEFINE_string("model_path", "./trained_model/candy/model.ckpt", "model path")
+flags.DEFINE_string("style_image_path", "./style_images/candy.jpg", "style image path")
 flags.DEFINE_string("train_dataset", "/home/hdx/data/coco/val2017/*.jpg", "dataset for fit")
 
 FLAGS = tf.app.flags.FLAGS
