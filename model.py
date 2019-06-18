@@ -64,7 +64,8 @@ def residual(inputs, filters, name):
     return tf.add(inputs, h0)
 
 
-def build_model(inputs, style, learning_rate):
+def build_model(inputs, style, learning_rate,
+                content_loss_weight, style_loss_weight):
     with slim.arg_scope(transfer_arg_scope()):
         trans, var = transfer_net(inputs - MEAN_VALUES, reuse=False)
 
@@ -78,9 +79,9 @@ def build_model(inputs, style, learning_rate):
     f4 = end_points["vgg_16/conv4/conv4_3"]
 
     trans_f3, inputs_f3, _ = tf.split(f3, 3, 0)
-    content_loss = 1.0*(tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3)))
-
-    style_loss = 100*styleloss(f1, f2, f3, f4)
+    content_loss = tf.nn.l2_loss(trans_f3 - inputs_f3) / tf.to_float(tf.size(trans_f3))
+    content_loss = content_loss_weight * content_loss
+    style_loss = style_loss_weight * styleloss(f1, f2, f3, f4)
 
     total_loss = content_loss + style_loss
 

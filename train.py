@@ -13,6 +13,8 @@ flags = tf.app.flags
 flags.DEFINE_integer("epoch", 50, "number of training epoch")
 flags.DEFINE_integer("batch_size", 4, "batch size")
 flags.DEFINE_float('learning_rate', 0.002, "learning rate")
+flags.DEFINE_float('content_loss_weight', 1.0, "content loss weight")
+flags.DEFINE_float('style_loss_weight', 100.0, "style loss weight")
 flags.DEFINE_string("summary_path", "./tensorboard/wave/", "tensorboard file path")
 flags.DEFINE_string("vgg_path", "./vgg_16.ckpt", "pre-trained vgg file path")
 flags.DEFINE_string("model_path", "trained_model/wave/model.ckpt", "model path")
@@ -32,7 +34,8 @@ def main():
 
     #build transfer model
     optimizer, trans, total_loss, content_loss, style_loss = \
-        build_model(inputs, style, FLAGS.learning_rate)
+        build_model(inputs, style, FLAGS.learning_rate,
+                    FLAGS.content_loss_weight, FLAGS.style_loss_weight)
 
     with tf.Session() as sess:
         # load pre-trained parameters
