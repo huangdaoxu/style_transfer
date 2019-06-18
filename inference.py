@@ -1,17 +1,14 @@
-import os
-
 import tensorflow as tf
 
 from utils import load_image
-from matplotlib import pyplot as plt
 
 flags = tf.app.flags
 ############################
 #    hyper parameters      #
 ############################
 flags.DEFINE_string("test_image", "./test/sunshine_boy.jpeg", "test image path")
-flags.DEFINE_string("model_path", "./trained_model/starry/model.ckpt-49000", "meta path")
-flags.DEFINE_string("saved_path", "./test/inference_starry.jpg", "transfromed image path")
+flags.DEFINE_string("model_path", "./trained_model/wave/model.ckpt-28000", "meta path")
+flags.DEFINE_string("saved_path", "./test/inference_wave.jpg", "transfromed image path")
 
 FLAGS = tf.app.flags.FLAGS
 

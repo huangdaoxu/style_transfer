@@ -44,4 +44,5 @@ python inference.py --test_image "test image" --model_path "your transfer model 
 
 ### Transformed image
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_starry.jpg)
+![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_wave.jpg)
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_landscape.jpg)
