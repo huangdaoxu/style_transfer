@@ -7,7 +7,7 @@ from model import build_model
 from utils import get_iterator, load_single_picture
 from utils import MEAN_VALUES
 
-style_pic = load_single_picture("/home/hdx/data/coco/style1.jpg")
+style_pic = load_single_picture("/home/hdx/data/coco/landscape.jpg")
 
 epoch = 50
 batch_size = 4
@@ -45,7 +45,7 @@ with tf.Session() as sess:
     sess.run(init)
     sess.run(tf.local_variables_initializer())
     style_pic = sess.run(style_pic)
-    writer = tf.summary.FileWriter("./tensorboard/", sess.graph)
+    writer = tf.summary.FileWriter("./tensorboard/wave/", sess.graph)
 
     coord = tf.train.Coordinator()
     thread = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -64,7 +64,7 @@ with tf.Session() as sess:
 
             if counter % 1000 == 0:
                 # save model parameters
-                saver.save(sess, ('trained_model/' + 'model.ckpt'), global_step=counter)
+                saver.save(sess, ('trained_model/wave/' + 'model.ckpt'), global_step=counter)
 
     except tf.errors.OutOfRangeError:
         coord.request_stop()
