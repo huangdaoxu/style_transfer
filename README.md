@@ -35,6 +35,10 @@ python inference.py --test_image "test image" --model_path "your transfer model 
 
 ## Results
 
+### style image
+![](https://github.com/huangdaoxu/style_transfer/blob/master/style_images/starry.jpg)
+![](https://github.com/huangdaoxu/style_transfer/blob/master/style_images/wave.jpg)
+
 ### The original image
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/sunshine_boy.jpeg)
 
