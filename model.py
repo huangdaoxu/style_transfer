@@ -64,7 +64,7 @@ def residual(inputs, filters, name):
     return tf.add(inputs, h0)
 
 
-def build_model(inputs, style):
+def build_model(inputs, style, learning_rate):
     with slim.arg_scope(transfer_arg_scope()):
         trans, var = transfer_net(inputs - MEAN_VALUES, reuse=False)
 
@@ -84,7 +84,7 @@ def build_model(inputs, style):
 
     total_loss = content_loss + style_loss
 
-    optimizer = tf.train.AdamOptimizer(0.002).minimize(total_loss, var_list=var)
+    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(total_loss, var_list=var)
 
     return optimizer, trans, total_loss, content_loss, style_loss
 

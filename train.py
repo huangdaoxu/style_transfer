@@ -6,66 +6,91 @@ from tensorflow.contrib import slim
 from model import build_model
 from utils import get_iterator, load_style_image
 
-style_pic = load_style_image("/home/hdx/data/coco/landscape.jpg")
+flags = tf.app.flags
+############################
+#    hyper parameters      #
+############################
+flags.DEFINE_integer("epoch", 50, "number of training epoch")
+flags.DEFINE_integer("batch_size", 4, "batch size")
+flags.DEFINE_float('learning_rate', 0.002, "learning rate")
+flags.DEFINE_string("summary_path", "./tensorboard/wave/", "tensorboard file path")
+flags.DEFINE_string("vgg_path", "./vgg_16.ckpt", "pre-trained vgg file path")
+flags.DEFINE_string("model_path", "trained_model/wave/model.ckpt", "model path")
 
-epoch = 50
-batch_size = 4
+FLAGS = tf.app.flags.FLAGS
 
-inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
-style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
+def main():
+    # create input tensor
+    inputs = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="input")
+    style = tf.placeholder(dtype=tf.float32, shape=[None, 256, 256, 3], name="style")
 
-iterator = get_iterator(glob.glob("/home/hdx/data/coco/val2017/*.jpg"), batch_size, epoch)
+    # init image data
+    style_image = load_style_image("/home/hdx/data/coco/landscape.jpg")
+    iterator = get_iterator(
+        glob.glob("/home/hdx/data/coco/val2017/*.jpg"),
+        FLAGS.batch_size, FLAGS.epoch)
 
-optimizer, trans, total_loss, content_loss, style_loss = build_model(inputs, style)
+    #build transfer model
+    optimizer, trans, total_loss, content_loss, style_loss = \
+        build_model(inputs, style, FLAGS.learning_rate)
 
-tf.summary.scalar('losses/total_loss', total_loss)
-tf.summary.scalar('losses/content_loss', content_loss)
-tf.summary.scalar('losses/style_loss', style_loss)
-tf.summary.image('transformed', trans)
-tf.summary.image('origin', inputs)
+    with tf.Session() as sess:
+        # load pre-trained parameters
+        vgg_vars = slim.get_variables_to_restore(include=['vgg_16'])
+        variable_restore_op = slim.assign_from_checkpoint_fn(FLAGS.vgg_path,
+                                                             vgg_vars,
+                                                             ignore_missing_vars=True)
+        variable_restore_op(sess)
 
-summary = tf.summary.merge_all()
+        # get trainable parameters
+        variables_to_save = slim.get_variables_to_restore(include=['transfer'])
+        saver = tf.train.Saver(variables_to_save)
 
-with tf.Session() as sess:
-    # load pre-trained parameters
-    vgg_vars = slim.get_variables_to_restore(include=['vgg_16'])
-    variable_restore_op = slim.assign_from_checkpoint_fn("./vgg_16.ckpt",
-                                                         vgg_vars,
-                                                         ignore_missing_vars=True)
-    variable_restore_op(sess)
+        all_var = tf.global_variables()
+        init_var = [v for v in all_var if 'vgg_16' not in v.name]
+        init = tf.variables_initializer(var_list=init_var)
+        sess.run(init)
+        sess.run(tf.local_variables_initializer())
+        style_image = sess.run(style_image)
 
-    variables_to_save = slim.get_variables_to_restore(include=['transfer'])
-    saver = tf.train.Saver(variables_to_save)
+        # config visualization parameters
+        tf.summary.scalar('losses/total_loss', total_loss)
+        tf.summary.scalar('losses/content_loss', content_loss)
+        tf.summary.scalar('losses/style_loss', style_loss)
+        tf.summary.image('transformed', trans)
+        tf.summary.image('origin', inputs)
+        summary = tf.summary.merge_all()
+        writer = tf.summary.FileWriter(FLAGS.summary_path, sess.graph)
 
-    all_var = tf.global_variables()
-    init_var = [v for v in all_var if 'vgg_16' not in v.name]
-    init = tf.variables_initializer(var_list=init_var)
-    sess.run(init)
-    sess.run(tf.local_variables_initializer())
-    style_pic = sess.run(style_pic)
-    writer = tf.summary.FileWriter("./tensorboard/wave/", sess.graph)
+        coord = tf.train.Coordinator()
+        thread = tf.train.start_queue_runners(sess=sess, coord=coord)
+        counter = 0
+        try:
+            while not coord.should_stop():
+                images = sess.run(iterator)
+                feed_dict = {inputs: images,
+                             style: [style_image for _ in range(images.shape[0])]}
+                sess.run([optimizer], feed_dict=feed_dict)
+                counter += 1
 
-    coord = tf.train.Coordinator()
-    thread = tf.train.start_queue_runners(sess=sess, coord=coord)
-    counter = 0
-    try:
-        while not coord.should_stop():
-            images = sess.run(iterator)
-            feed_dict = {inputs: images,
-                         style: [style_pic for _ in range(images.shape[0])]}
-            sess.run([optimizer], feed_dict=feed_dict)
-            counter += 1
-            if counter % 10 == 0:
-                result = sess.run(summary, feed_dict=feed_dict)
-                writer.add_summary(result, counter)
+                if counter % 10 == 0:
+                    result = sess.run(summary, feed_dict=feed_dict)
+                    # update summary
+                    writer.add_summary(result, counter)
 
-            if counter % 1000 == 0:
-                # save model parameters
-                saver.save(sess, ('trained_model/wave/' + 'model.ckpt'), global_step=counter)
+                if counter % 1000 == 0:
+                    # save model parameters
+                    saver.save(sess, FLAGS.model_path, global_step=counter)
 
-    except tf.errors.OutOfRangeError:
-        coord.request_stop()
-        coord.join(thread)
+        except tf.errors.OutOfRangeError:
+            coord.request_stop()
+            coord.join(thread)
 
-    writer.close()
+        writer.close()
+
+
+if __name__ == '__main__':
+    tf.app.run()
+
+
 
