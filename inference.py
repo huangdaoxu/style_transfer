@@ -10,8 +10,8 @@ flags = tf.app.flags
 #    hyper parameters      #
 ############################
 flags.DEFINE_string("test_image", "./test/sunshine_boy.jpeg", "test image path")
-flags.DEFINE_string("model_path", "./trained_model/starry/model.ckpt-49000", "meta path")
-flags.DEFINE_string("saved_path", "./test/inference_starry.jpg", "transfromed image path")
+flags.DEFINE_string("model_path", "./trained_model/candy/model.ckpt-6000", "meta path")
+flags.DEFINE_string("saved_path", "./test/inference_candy.jpg", "transfromed image path")
 
 FLAGS = tf.app.flags.FLAGS
 

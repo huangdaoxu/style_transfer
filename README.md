@@ -33,16 +33,23 @@ tensorboard --logdir "your summary path" --port 8888
 python inference.py --test_image "test image" --model_path "your transfer model path" --saved_path "transfromed image path"
 ```
 
+**NOTE:**
+
+1.I provide my trained model in this link: https://pan.baidu.com/s/1vgNb1sdfxVYXwLAtrv0ndw<br>
+2.You should fine tune the style_loss_weight, if you want to get a different style weights.
+
 ## Results
 
 ### Style image
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/style_images/starry.jpg)
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/style_images/wave.jpg)
+![](https://github.com/huangdaoxu/style_transfer/blob/master/style_images/candy.jpg)
 
-### The original image
+### Original image
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/sunshine_boy.jpeg)
 
 ### Transformed image
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_starry.jpg)
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_wave.jpg)
+![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_candy.jpg)
 ![](https://github.com/huangdaoxu/style_transfer/blob/master/test/inference_landscape.jpg)
